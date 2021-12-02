@@ -1,0 +1,88 @@
+go并发编程中用一个goroutine来处理一个任务，而它经常又会创建多个goroutine来负责
+
+        g
+  g1    g2    g3
+  g4
+
+在api 边界或执行过程中传递截止信号，取消信号，或其他请求数据，可以使用context
+
+context       emptyCtx     int
+
+
+
+              cancelCtx    type cancelCtx struct {
+                            	Context
+
+                             	mu       sync.Mutex            // protects following fields
+                            	done     chan struct{}         // created lazily, closed by first cancel call
+                            	children map[canceler]struct{} // set to nil by the first cancel call
+                            	err      error                 // set to non-nil by the first cancel call
+                           }
+
+
+
+
+              timerCtx       type timerCtx struct {
+                            	cancelCtx
+                            	timer *time.Timer // Under cancelCtx.mu.
+
+                            	deadline time.Time
+                            }                                                  【
+
+
+              valueCtx      type valueCtx struct {
+                            	Context
+                            	key, val interface{}
+                            }
+
+
+
+Background：
+func Background() Context {
+	return background
+}
+ctx := context.Background()    //在初始化的时候获取一个context
+ctx [tab *itad]   context 元数据
+                  *emptyCtx 类型数据
+    [data]        0
+
+
+
+TODO：
+func TODO() Context {
+	return todo
+}
+
+
+withCancel
+func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+ctx1,cancle := whithCancel
+ctx1 [tab *itad]    context 元数据
+                    *cancelCtx
+     [data]         mu
+                   	done
+                    children
+                    err
+
+
+WithDeadline
+func WithDeadline(parent Context, d time.Time) (Context, CancelFunc)
+ctx2,cancle := whithCancel
+ctx2 [tab *itad]    context 元数据
+                    *timeCtr
+     [data]
+
+WithTimeout
+func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
+
+
+
+WithValue
+var keyA string = "key"
+ctx := context.Background()
+ctxA:= context.WithValue(ctx,keyA,"valA")
+ctxA [tab *itad] context 元数据
+                 *valueCtx
+     [data]      [key,value]
+
+
